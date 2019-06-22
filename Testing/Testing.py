@@ -8,14 +8,17 @@ import itertools
 from scipy.ndimage import gaussian_filter
 from scipy import signal
 from skimage import data, io
-from skimage import img_as_float
+from skimage import img_as_float, img_as_ubyte
 from skimage.morphology import reconstruction
 from skimage.color import rgb2gray
 from scipy.signal import find_peaks
 from skimage.exposure import histogram
 import more_itertools as mit
 import math
+from PIL import Image
+import pytesseract
 
+import os
 
 def avg(l):
     #Function Used to determine the average of a given list
@@ -33,9 +36,17 @@ def intersection(lst1, lst2):
     lst3 = [value for value in lst1 if value in lst2]
     return lst3
 
-file = 'example17.png'
-print(file)
-image = img_as_float(io.imread(file))
+
+#Specifying Tesseract location:
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
+
+FileNumber = 7
+if FileNumber == 1:
+    File = 'Example.png'
+else:
+    File = 'Example' + str(FileNumber) + '.png'
+print(File)
+image = img_as_float(io.imread("C:\\Users\\Polo\\Documents\\GitHub\\OTR---LaTeX\\TestImages\\" + File))
 (height,width, _) = image.shape
 Table = img_as_float(rgb2gray(image)) #Convert Original Image to Grayscale
 
@@ -43,7 +54,8 @@ Complex = True
 Demo = True
 
 if Demo:
-    fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(16, 5))
+    pass
+    #fig, (ax0, ax1) = plt.subplots(nrows=1, ncols=2, figsize=(16, 5))
 else:
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(8, 2.5))
 
@@ -215,13 +227,23 @@ if Complex:
     Row = [[] for index in range(len(TextLocs))]
     Row2 = [[] for index in range(len(TextLocs))]
     Markers = []
+    Locations = []
+    Text = []
     for index in range(len(Row)):
-        Row[index] = Table[HorBoundaries2[index][0]+5:HorBoundaries2[index][1]-5,0:width]
+        Row[index] = Table[HorBoundaries2[index][0]:HorBoundaries2[index][1],0:width]
         HeightTemp = Row[index].shape[0]
         Row2[index] = [[] for index3 in range(len(TextLocs))]
         for index2 in range(len(Row2[index])):
-            Row2[index][index2] = Row[index][0:HeightTemp, Boundaries2[index2][0]+5:Boundaries2[index2][1]-5]
+            Row2[index][index2] = Row[index][0:HeightTemp, Boundaries2[index2][0]:Boundaries2[index2][1]]
+            Location = [index, index2]
+            Locations.append(Location)
+            io.imsave("Pic" + str(index) + "_" + str(index2) + ".png", Row2[index][index2])
+            io.imsave("Text.png", img_as_ubyte(Row2[index][index2]))
+            TextTemp = pytesseract.image_to_string(Image.open("Text.png"), lang="nld")
+            Text.append(TextTemp)
             Markers.append([[HorBoundaries2[index][0],Boundaries2[index2][1]],[HorBoundaries2[index][1],Boundaries2[index2][0]]])
+    Locations2 = [str(group[0])+'.'+str(group[1]) for group in Locations]
+    TableContents = dict(zip(Locations2, Text))
     VerFill =[]
     for index in range(len(Row2)):
         for index2 in range(len(Row2[index])):
@@ -252,12 +274,6 @@ if Complex:
         for key, group in itertools.groupby(VerFill[index]):
             VerFill2[index].append(key)
 
-
-
-
-
-
-
     Seperators = list(set(Rows + NegRows + [width, 0]))
     Seperators.sort()
     SumsPieces = [None for x in range(len(Seperators))]
@@ -268,12 +284,19 @@ if Complex:
     for index in range(len(VerSums)):
         if Distance(index, Seperators) <= 5:
             VerSums[index] = 0
+    os.system("cls")
+    print(TableContents)
+    for index in range(0, len(HorBoundaries2)):
+        for index2 in range(0, len(Boundaries2)):
+            print(TableContents[str(index)+"."+str(index2)], end = "\t")
+        print("\n")
+
 
 
 
 if Demo:
-
-    ax0.imshow(Table, vmin=image.min(), vmax=image.max(), cmap='gray')
+    pass
+    # ax0.imshow(Table, vmin=image.min(), vmax=image.max(), cmap='gray')
     # for index in range(len(Markers)):
     #     ax0.Rectangle((Markers[index][0][0], Markers[index][0][1]), Markers[index][1][0]-Markers[0][0], Markers[index][1][1] - Markers[index][0][1])
     # for index in range(0, len(Rows)):
@@ -284,11 +307,11 @@ if Demo:
     #     ax0.axhline(NegRows[index], color = "blue")
     # for index in range(len(NegCols)):
     #     ax0.axvline(NegCols[index], color = "blue")
-    ax0.set_title('Table')
-    ax0.axis('off')
-
-    ax1.plot(VerFill[0], color = "black", label = "Vertical Fill")
-    ax1.set_ylim(-0.5, 1.5)
+    # ax0.set_title('Table')
+    # ax0.axis('off')
+    #
+    # ax1.plot(VerFill[0], color = "black", label = "Vertical Fill")
+    # ax1.set_ylim(-0.5, 1.5)
 else:
     ax0.plot(HorSums, color = "black",  label="Horizontale Som")
     # for index in range(len(PotColPeaks)):
@@ -318,7 +341,10 @@ else:
     ax2.set_title('Table')
     ax2.axis('off')
 
-print("This is a table with Width: " + str(len(Boundaries2)) + " and Height: " + str(len(HorBoundaries2)))
+#print("This is a table with Width: " + str(len(Boundaries2)) + " and Height: " + str(len(HorBoundaries2)))
 
-fig.tight_layout()
-plt.show()
+if Demo:
+    pass
+else:
+    fig.tight_layout()
+    plt.show()

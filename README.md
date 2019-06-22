@@ -1,7 +1,6 @@
 # OTR---LaTeX
 OTR (Optical Table Recognition) is a project I made to convert screenshots of tables into fully integratable and customizable LaTeX tables. Made possible using Python (SciPy, Pillow) and Tesseract OCR software
 
-<<<<<<< HEAD
 Creator: Polo de Bliek
 For questions: polo.debliek@kuleuven.be I'll do my best to answer your questions if you have them!
 
@@ -16,12 +15,3 @@ For questions: polo.debliek@kuleuven.be I'll do my best to answer your questions
 **22 - 06 - 2019**
 * Further reliability improvement and testing with more advanced test case (Intend to get everything to a reliability of 95%)
 * Integration with Tesseract OCR Software to actually convert the table into text
-=======
-Features/Capabilities:
-
-Project state:  ACTIVE
-Creator:        Polo de Bliek
-
-If you have questions about this project:
-polo.debliek@kuleuven.be
->>>>>>> 4719f329bec01d395cb82f268aa0f8b0a3056c99
